@@ -7,6 +7,5 @@ import (
 
 // Llamamos el controlador de endpoint en enrutador
 func Setup(app *fiber.App) {
-	// app.Get("/", controllers.Register)
-	app.Get("/", controllers.Register)
+	app.Post("/api/register", controllers.Register)
 }
