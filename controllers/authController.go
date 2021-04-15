@@ -56,24 +56,19 @@ func Login (c *fiber.Ctx) error {
 	var user models.User
 	user.Email = data["email"]
 	user.Password = data["pass"]
-	rowsId, err := database.DB.Query("SELECT ID FROM TEST.CLIENT WHERE EMAIL = '"+user.Email+"' AND PASSWORD = '"+user.Password+"'")
-	rowsName, err := database.DB.Query("SELECT NAME FROM TEST.CLIENT WHERE EMAIL = '"+user.Email+"' AND PASSWORD = '"+user.Password+"'")
+	rows, err := database.DB.Query("SELECT ID, NAME FROM TEST.CLIENT WHERE EMAIL = '"+user.Email+"' AND PASSWORD = '"+user.Password+"'")
 	if err != nil {
 		fmt.Println("Error en la consulta")
 		log.Fatal(err)
 		return err
 	}
 
-	for rowsName.Next() {
-		var data string
-		rowsName.Scan(&data)
-		user.Name = data
-	}
-
-	for rowsId.Next() {
-		var data int
-		rowsId.Scan(&data)
-		user.Id = data
+	for rows.Next() {
+		var id int
+		var name string
+		rows.Scan(&id, &name)
+		user.Id = id
+		user.Name = name
 	}
 
 	cookie := fiber.Cookie{
@@ -87,4 +82,25 @@ func Login (c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"msg": "success",
 	})
+}
+
+func User (c *fiber.Ctx) error {
+	cookie := c.Cookies("user")
+	var user models.User
+	rows, err := database.DB.Query("SELECT NAME, EMAIL FROM CLIENT WHERE ID = '"+cookie+"' ")
+	if err != nil {
+		fmt.Println("Error en la consulta")
+		log.Fatal(err)
+		return err
+	}
+
+	var name string
+	var email string
+	for rows.Next() {
+		rows.Scan(&name, &email)
+	}
+
+	user.Email = email
+	user.Name = name
+	return c.JSON(name)
 }
