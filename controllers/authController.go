@@ -8,6 +8,7 @@ import (
 	"login_register/database"
 	"login_register/models"
 	"strconv"
+	"time"
 )
 
 // endpoints
@@ -75,5 +76,15 @@ func Login (c *fiber.Ctx) error {
 		user.Id = data
 	}
 
-	return c.JSON(user)
+	cookie := fiber.Cookie{
+		Name: "user",
+		Value: strconv.Itoa(user.Id),
+		Expires: time.Now().Add(time.Hour*24), // 1 Día
+		HTTPOnly: true,
+	}
+	c.Cookie(&cookie)
+
+	return c.JSON(fiber.Map{
+		"msg": "success",
+	})
 }
