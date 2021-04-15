@@ -1,9 +1,10 @@
 import React from 'react';
 
-const Home = () => {
+const Home = (props: {name: string}) => {
+
     return (
         <div>
-            Home
+            Hola {props.name ? props.name: 'no estas autenticado'}
         </div>
     )
 }

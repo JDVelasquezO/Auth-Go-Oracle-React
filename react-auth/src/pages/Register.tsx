@@ -1,10 +1,12 @@
 import React, { SyntheticEvent } from 'react';
 import { useState } from 'react';
+import { Redirect } from 'react-router-dom';
 
 const Register = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [pass, setPass] = useState('');
+    const [redirect, setRedirect] = useState(false)
 
     const handlerSubmit = async (e: SyntheticEvent) => {
         e.preventDefault();
@@ -16,7 +18,13 @@ const Register = () => {
             body: JSON.stringify({
                 name, email, pass
             })
+
         });
+        setRedirect(true);
+    }
+
+    if (redirect) {
+        return <Redirect to='/login'/>
     }
 
     return (
