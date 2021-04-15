@@ -86,7 +86,7 @@ func Login (c *fiber.Ctx) error {
 
 func User (c *fiber.Ctx) error {
 	cookie := c.Cookies("user")
-	var user models.User
+	id, _ := strconv.Atoi(cookie)
 	rows, err := database.DB.Query("SELECT NAME, EMAIL FROM CLIENT WHERE ID = '"+cookie+"' ")
 	if err != nil {
 		fmt.Println("Error en la consulta")
@@ -94,13 +94,35 @@ func User (c *fiber.Ctx) error {
 		return err
 	}
 
+	if id == 0 {
+		return c.JSON(fiber.Map{
+			"msg": "unauthenticated",
+		})
+	}
+
+	var user models.User
 	var name string
 	var email string
 	for rows.Next() {
 		rows.Scan(&name, &email)
 	}
 
+	user.Id = id
 	user.Email = email
 	user.Name = name
-	return c.JSON(name)
+	return c.JSON(user)
+}
+
+func Logout (c *fiber.Ctx) error {
+	cookie := fiber.Cookie{ // Eliminamos la cookie
+		Name: "user",
+		Value: "",
+		Expires: time.Now().Add(-time.Hour),
+		HTTPOnly: true,
+	}
+
+	c.Cookie(&cookie)
+	return c.JSON(fiber.Map{
+		"msg": "success",
+	})
 }
